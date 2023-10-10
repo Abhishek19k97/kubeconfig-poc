@@ -5,30 +5,6 @@ const chokidar = require("chokidar");
 const PropertiesReader = require('properties-reader');
 const app = express();
 
-// const readPropertyFile = (path) => {
-//     const properties = PropertiesReader(path);
-//     return properties.getAllProperties();
-// };
-
-// let config = { ...readPropertyFile('/config/config.properties'), ...readPropertyFile('/config/configNew.properties') };
-
-// const watcher = chokidar.watch('/config', {
-//     persistent: true
-// });
-
-// watcher.on('change', (path) => {
-//     console.log(`File ${path} has been changed`);
-
-//     // Update the relevant properties based on the changed file
-//     if (path.endsWith('config.properties')) {
-//         config = { ...config, ...readPropertyFile(path) };
-//     } else if (path.endsWith('configNew.properties')) {
-//         config = { ...config, ...readPropertyFile(path) };
-//     }
-
-//     console.log('Updated Config:', config);
-// });
-
 const configMapDirectoryPath = '/config'; 
 let configMapData = {};
 
@@ -49,17 +25,6 @@ const watchConfigMaps = () => {
         console.log('Updated ConfigMap data:', configMapData);
       }
     });
-    watcher.on('add', (filePath) => {
-        console.log(`New ConfigMap file added: ${filePath}`);
-        if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-          configMapData = {...configMapData, ...readConfigMap(filePath)};
-          console.log('Added ConfigMap data:', configMapData);
-        }
-      })
-    watcher.on('unlink', (filePath) => {
-        console.log(`ConfigMap file deleted: ${filePath}`);
-        readInitialConfigMaps();
-      })
     watcher.on('error', (error) => {
       console.error('Error watching ConfigMap directory:', error);
     });
@@ -72,7 +37,7 @@ const watchConfigMaps = () => {
     for (const file of files) {
       const filePath = path.join(configMapDirectoryPath, file);
       if (fs.statSync(filePath).isFile()) {
-        configMapData = readConfigMap(filePath);
+        configMapData = {...configMapData, ...readConfigMap(filePath)};
         console.log(`Initial ConfigMap data from ${filePath}:`, configMapData);
       }
     }
